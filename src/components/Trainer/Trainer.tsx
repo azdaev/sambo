@@ -1,4 +1,5 @@
 import React from "react";
+import ImageSkeleton from "../ImageSkeleton";
 import {
   TrainerContainer,
   TrainerContent,
@@ -20,7 +21,11 @@ const Trainer: React.FC = () => {
         <TrainerGrid>
           <TrainerImageContainer>
             <TrainerImage>
-              <img src="/images/coach.jpg" alt="Ахтаханов Анзор Алиевич" />
+              <ImageSkeleton 
+                src="/images/coach.jpg" 
+                alt="Ахтаханов Анзор Алиевич"
+                borderRadius="20px"
+              />
             </TrainerImage>
           </TrainerImageContainer>
 

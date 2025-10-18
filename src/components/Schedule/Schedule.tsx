@@ -18,19 +18,37 @@ const Schedule: React.FC = () => {
         
         <ScheduleGrid>
           <AgeGroupCard>
-            <AgeGroupTitle>7-9 лет и 10+</AgeGroupTitle>
+            <AgeGroupTitle>7-9 лет</AgeGroupTitle>
             <ScheduleList>
               <li>
                 <span className="day">Понедельник</span>
-                <span className="time">17:00 - 18:30</span>
+                <span className="time">18:30</span>
               </li>
               <li>
                 <span className="day">Среда</span>
-                <span className="time">17:00 - 18:30</span>
+                <span className="time">18:30</span>
               </li>
               <li>
                 <span className="day">Пятница</span>
-                <span className="time">17:00 - 18:30</span>
+                <span className="time">18:30</span>
+              </li>
+            </ScheduleList>
+          </AgeGroupCard>
+
+          <AgeGroupCard>
+            <AgeGroupTitle>10+ лет</AgeGroupTitle>
+            <ScheduleList>
+              <li>
+                <span className="day">Понедельник</span>
+                <span className="time">20:00</span>
+              </li>
+              <li>
+                <span className="day">Среда</span>
+                <span className="time">20:00</span>
+              </li>
+              <li>
+                <span className="day">Пятница</span>
+                <span className="time">20:00</span>
               </li>
             </ScheduleList>
           </AgeGroupCard>
@@ -40,15 +58,15 @@ const Schedule: React.FC = () => {
             <ScheduleList>
               <li>
                 <span className="day">Вторник</span>
-                <span className="time">17:00 - 18:00</span>
+                <span className="time">19:00</span>
               </li>
               <li>
                 <span className="day">Четверг</span>
-                <span className="time">17:00 - 18:00</span>
+                <span className="time">19:00</span>
               </li>
               <li>
                 <span className="day">Суббота</span>
-                <span className="time">10:00 - 11:00</span>
+                <span className="time">14:30</span>
               </li>
             </ScheduleList>
           </AgeGroupCard>
@@ -59,6 +77,10 @@ const Schedule: React.FC = () => {
           <p>
             Не откладывайте! Места в группах ограничены. 
             Приходите на пробную тренировку и убедитесь в качестве нашего обучения.
+          </p>
+          <p className="schedule-note">
+            ⚠️ <strong>Важно:</strong> Время тренировок может измениться. 
+            Пожалуйста, уточняйте актуальное расписание перед приходом на тренировку.
           </p>
         </ImportantNote>
 

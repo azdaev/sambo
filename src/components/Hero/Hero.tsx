@@ -1,4 +1,5 @@
 import React from "react";
+import ImageSkeleton from "../ImageSkeleton";
 import {
   HeroContainer,
   HeroContent,
@@ -44,7 +45,12 @@ const Hero: React.FC = () => {
         </HeroText>
 
         <HeroImage>
-          <img src="/images/team-photo.jpg" alt="Тренировка по самбо" />
+          <ImageSkeleton 
+            src="/images/team-photo.JPG" 
+            alt="Тренировка по самбо"
+            height="400px"
+            borderRadius="20px"
+          />
           <FloatingBadge>
             ПЕРВАЯ
             <br />

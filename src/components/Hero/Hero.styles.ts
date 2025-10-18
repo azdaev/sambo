@@ -23,7 +23,12 @@ export const HeroContainer = styled.section`
 
   @media (max-width: 768px) {
     padding-top: 70px;
-    min-height: 90vh;
+    min-height: 100vh;
+  }
+
+  @media (max-width: 480px) {
+    padding-top: 60px;
+    min-height: 100vh;
   }
 `;
 
@@ -130,9 +135,16 @@ export const PrimaryButton = styled.button`
     background: ${colors.lightGray};
   }
 
+  @media (max-width: 768px) {
+    padding: 12px 25px;
+    font-size: 0.9rem;
+  }
+
   @media (max-width: 480px) {
     width: 100%;
-    max-width: 250px;
+    max-width: 280px;
+    padding: 15px 25px;
+    font-size: 1rem;
   }
 `;
 
@@ -154,9 +166,16 @@ export const SecondaryButton = styled.button`
     transform: translateY(-3px);
   }
 
+  @media (max-width: 768px) {
+    padding: 12px 25px;
+    font-size: 0.9rem;
+  }
+
   @media (max-width: 480px) {
     width: 100%;
-    max-width: 250px;
+    max-width: 280px;
+    padding: 15px 25px;
+    font-size: 1rem;
   }
 `;
 

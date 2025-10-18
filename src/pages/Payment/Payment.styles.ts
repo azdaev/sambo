@@ -5,6 +5,14 @@ export const PaymentContainer = styled.div`
   min-height: 100vh;
   padding: 120px 0 60px;
   background: ${colors.background};
+
+  @media (max-width: 768px) {
+    padding: 100px 0 40px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 90px 0 30px;
+  }
 `;
 
 export const PaymentContent = styled.div`
@@ -48,9 +56,17 @@ export const PaymentGrid = styled.div`
   grid-template-columns: 2fr 1fr;
   gap: 40px;
 
-  @media (max-width: 968px) {
+  @media (max-width: 1024px) {
     grid-template-columns: 1fr;
     gap: 30px;
+  }
+
+  @media (max-width: 768px) {
+    gap: 25px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 20px;
   }
 `;
 
@@ -61,7 +77,12 @@ export const ContractSection = styled.div`
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
 
   @media (max-width: 768px) {
-    padding: 30px;
+    padding: 25px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 20px;
+    border-radius: 10px;
   }
 `;
 
@@ -85,15 +106,54 @@ export const ContractText = styled.div`
   padding-right: 10px;
   margin-bottom: 30px;
 
+  h2 {
+    font-size: 1.4rem;
+    color: ${colors.primary};
+    margin: 0 0 20px;
+    text-align: center;
+
+    @media (max-width: 768px) {
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 1.1rem;
+    }
+  }
+
   h3 {
     font-size: 1.1rem;
     color: ${colors.textPrimary};
     margin: 20px 0 10px;
     font-weight: 600;
+
+    @media (max-width: 768px) {
+      font-size: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.95rem;
+    }
+  }
+
+  h4 {
+    font-size: 1rem;
+    color: ${colors.textPrimary};
+    margin: 15px 0 8px;
+    font-weight: 600;
+
+    @media (max-width: 480px) {
+      font-size: 0.9rem;
+    }
   }
 
   p {
     margin-bottom: 15px;
+
+    @media (max-width: 480px) {
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
   }
 
   ul {
@@ -102,12 +162,29 @@ export const ContractText = styled.div`
 
     li {
       margin-bottom: 5px;
+      
+      @media (max-width: 480px) {
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+      }
     }
   }
 
   .highlight {
     color: ${colors.primary};
     font-weight: 600;
+  }
+
+  @media (max-width: 768px) {
+    max-height: 300px;
+    font-size: 0.9rem;
+    padding-right: 5px;
+  }
+
+  @media (max-width: 480px) {
+    max-height: 250px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
   }
 
   /* Стилизация скроллбара */

@@ -1,5 +1,5 @@
-import styled from 'styled-components';
-import { colors } from '../../styles/colors';
+import styled from "styled-components";
+import { colors } from "../../styles/colors";
 
 export const GalleryContainer = styled.section`
   padding: 100px 0;
@@ -25,7 +25,7 @@ export const SectionTitle = styled.h2`
   position: relative;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: -15px;
     left: 50%;
@@ -49,27 +49,49 @@ export const CarouselContainer = styled.div`
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+
+  @media (max-width: 768px) {
+    max-width: 95%;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  @media (max-width: 480px) {
+    max-width: 100%;
+    border-radius: 10px;
+    margin: 0 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
 `;
 
 export const CarouselTrack = styled.div<{ currentIndex: number }>`
   display: flex;
   transition: transform 0.5s ease-in-out;
-  transform: translateX(-${props => props.currentIndex * 100}%);
+  transform: translateX(-${(props) => props.currentIndex * 100}%);
 `;
 
 export const CarouselSlide = styled.div`
   min-width: 100%;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 500px;
+
+  @media (max-width: 768px) {
+    height: 350px;
+  }
+
+  @media (max-width: 480px) {
+    height: 280px;
+  }
 
   img {
     width: 100%;
-    height: 500px;
+    height: 100%;
     object-fit: contain;
+    object-position: center;
     display: block;
-
-    @media (max-width: 768px) {
-      height: 300px;
-    }
   }
 `;
 
@@ -108,11 +130,11 @@ export const SlideOverlay = styled.div`
   }
 `;
 
-export const CarouselButton = styled.button<{ direction: 'prev' | 'next' }>`
+export const CarouselButton = styled.button<{ direction: "prev" | "next" }>`
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  ${props => props.direction === 'prev' ? 'left: 20px;' : 'right: 20px;'}
+  ${(props) => (props.direction === "prev" ? "left: 20px;" : "right: 20px;")}
   background: rgba(255, 255, 255, 0.9);
   border: none;
   width: 50px;
@@ -135,7 +157,7 @@ export const CarouselButton = styled.button<{ direction: 'prev' | 'next' }>`
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    
+
     &:hover {
       transform: translateY(-50%) scale(1);
     }
@@ -145,7 +167,7 @@ export const CarouselButton = styled.button<{ direction: 'prev' | 'next' }>`
     width: 40px;
     height: 40px;
     font-size: 1rem;
-    ${props => props.direction === 'prev' ? 'left: 10px;' : 'right: 10px;'}
+    ${(props) => (props.direction === "prev" ? "left: 10px;" : "right: 10px;")}
   }
 `;
 
@@ -161,7 +183,7 @@ export const CarouselDot = styled.button<{ active: boolean }>`
   height: 12px;
   border-radius: 50%;
   border: none;
-  background: ${props => props.active ? colors.primary : colors.gray};
+  background: ${(props) => (props.active ? colors.primary : colors.gray)};
   cursor: pointer;
   transition: all 0.3s ease;
 

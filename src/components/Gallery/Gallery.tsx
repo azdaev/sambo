@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ImageSkeleton from "../ImageSkeleton";
 import {
   GalleryContainer,
   GalleryContent,
@@ -60,7 +61,11 @@ const Gallery: React.FC = () => {
           <CarouselTrack currentIndex={currentIndex}>
             {galleryImages.map((image, index) => (
               <CarouselSlide key={index}>
-                <img src={image.src} alt={image.title} />
+                <ImageSkeleton 
+                  src={image.src} 
+                  alt={image.title}
+                  borderRadius="10px"
+                />
               </CarouselSlide>
             ))}
           </CarouselTrack>

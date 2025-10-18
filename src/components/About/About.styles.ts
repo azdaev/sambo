@@ -1,5 +1,5 @@
-import styled from 'styled-components';
-import { colors } from '../../styles/colors';
+import styled from "styled-components";
+import { colors } from "../../styles/colors";
 
 export const AboutContainer = styled.section`
   padding: 100px 0;
@@ -25,7 +25,7 @@ export const SectionTitle = styled.h2`
   position: relative;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: -15px;
     left: 50%;
@@ -95,7 +95,7 @@ export const FeaturesList = styled.ul`
     color: ${colors.textSecondary};
 
     &::before {
-      content: '✓';
+      content: "✓";
       background: ${colors.redGradient};
       color: ${colors.white};
       width: 24px;
@@ -128,9 +128,8 @@ export const AboutImage = styled.div`
 
   img {
     width: 100%;
-    max-width: 500px;
     height: 400px;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center;
     border-radius: 15px;
     transition: transform 0.3s ease;
@@ -142,7 +141,7 @@ export const AboutImage = styled.div`
 
   @media (max-width: 768px) {
     max-height: 300px;
-    
+
     img {
       height: 300px;
     }
