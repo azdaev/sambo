@@ -22,12 +22,12 @@ export const HeroContainer = styled.section`
   }
 
   @media (max-width: 768px) {
-    padding-top: 70px;
+    padding-top: 100px;
     min-height: 100vh;
   }
 
   @media (max-width: 480px) {
-    padding-top: 60px;
+    padding-top: 110px;
     min-height: 100vh;
   }
 `;
