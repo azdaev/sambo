@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   PaymentContainer,
   PaymentContent,
@@ -14,23 +15,34 @@ import {
   PriceCard,
   PaymentForm,
   PaymentButton,
-  PaymentNote,
 } from "./Payment.styles";
+import { createPayment, getPaymentStatus } from "../../services/paymentApi";
 
 const Payment: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [isContractAccepted, setIsContractAccepted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
     email: "",
     childName: "",
-    childAge: "",
     paymentPeriod: "8",
+    customAmount: "",
   });
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  // Проверяем возврат с YooKassa
+  useEffect(() => {
+    const paymentId = searchParams.get("paymentId") || localStorage.getItem("pendingPaymentId");
+    if (paymentId) {
+      checkPaymentStatus(paymentId);
+      localStorage.removeItem("pendingPaymentId");
+      // Очищаем URL от параметра paymentId
+      if (searchParams.get("paymentId")) {
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    }
+  }, [searchParams]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -38,27 +50,93 @@ const Payment: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const checkPaymentStatus = async (paymentId: string) => {
+    try {
+      const payment = await getPaymentStatus(paymentId);
+      if (payment.status === "succeeded") {
+        alert("Платеж успешно выполнен! Чек будет отправлен на вашу почту.");
+      } else if (payment.status === "canceled") {
+        alert("Платеж был отменен.");
+      }
+    } catch {
+      // Ошибка при проверке статуса платежа
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isContractAccepted) {
       alert("Пожалуйста, примите условия договора оферты");
       return;
     }
 
-    // Здесь будет интеграция с платежной системой
-    alert(
-      "Функция оплаты будет подключена позже. Пожалуйста, свяжитесь с нами по телефону +7 (920) 164-61-58 или email: a.akhtakhanov@mail.ru"
-    );
+    if (!formData.email) {
+      alert("Пожалуйста, укажите email для получения чека");
+      return;
+    }
+
+    if (!formData.childName) {
+      alert("Пожалуйста, укажите ФИО ребенка");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Определяем сумму в зависимости от выбранного варианта
+      let amount: number;
+      let description: string;
+
+      if (formData.paymentPeriod === "12") {
+        amount = 7000;
+        description = "12";
+      } else if (formData.paymentPeriod === "8") {
+        amount = 6000;
+        description = "8";
+      } else if (formData.paymentPeriod === "custom") {
+        const customAmount = parseFloat(formData.customAmount);
+        if (isNaN(customAmount) || customAmount <= 0) {
+          alert("Пожалуйста, введите корректную сумму");
+          setIsLoading(false);
+          return;
+        }
+        amount = customAmount;
+        description = "custom";
+      } else {
+        amount = 6000;
+        description = "8";
+      }
+
+      const returnUrl = `${window.location.origin}/payment`;
+
+      const response = await createPayment({
+        amount,
+        email: formData.email,
+        childName: formData.childName,
+        paymentPeriod: description,
+        returnUrl,
+      });
+
+      // Сохраняем paymentId в localStorage для проверки после возврата
+      localStorage.setItem("pendingPaymentId", response.paymentId);
+
+      // Перенаправляем на страницу оплаты YooKassa
+      window.location.href = response.confirmationUrl;
+    } catch (error) {
+      alert(`Ошибка при создании платежа: ${error instanceof Error ? error.message : "Неизвестная ошибка"}`);
+      setIsLoading(false);
+    }
   };
 
   const isFormValid = () => {
-    return (
-      isContractAccepted &&
-      formData.name &&
-      formData.phone &&
-      formData.childName &&
-      formData.childAge
-    );
+    if (!isContractAccepted) return false;
+    if (!formData.email) return false;
+    if (!formData.childName) return false;
+    if (formData.paymentPeriod === "custom") {
+      const amount = parseFloat(formData.customAmount);
+      return !isNaN(amount) && amount > 0;
+    }
+    return true;
   };
 
   return (
@@ -89,8 +167,7 @@ const Payment: React.FC = () => {
                 Реквизиты организации
               </h4>
               <p style={{ margin: "5px 0" }}>
-                <strong>Название:</strong> Индивидуальный предприниматель
-                Ахтаханов Анзор Алиевич
+                <strong>Название:</strong> Индивидуальный предприниматель Ахтаханов Анзор Алиевич
               </p>
               <p style={{ margin: "5px 0" }}>
                 <strong>ОГРНИП:</strong> 325690000048715
@@ -100,10 +177,7 @@ const Payment: React.FC = () => {
               </p>
               <p style={{ margin: "5px 0" }}>
                 <strong>E-mail:</strong>{" "}
-                <a
-                  href="mailto:a.akhtakhanov@mail.ru"
-                  style={{ color: "#D32F2F" }}
-                >
+                <a href="mailto:a.akhtakhanov@mail.ru" style={{ color: "#D32F2F" }}>
                   a.akhtakhanov@mail.ru
                 </a>
               </p>
@@ -165,50 +239,38 @@ const Payment: React.FC = () => {
                 <br />
                 ИНН 694100588980, ОГРНИП 325690000048715,
                 <br />
-                предлагает договор публичной оферты для физических и юридических
-                лиц.
+                предлагает договор публичной оферты для физических и юридических лиц.
               </p>
 
               <h3>1. ОБЩИЕ ПОЛОЖЕНИЯ</h3>
               <p>
-                1.1. Настоящий Договор регулирует отношения между ИП Ахтаханов
-                А.А. (далее - «Исполнитель») и Законным Представителем
-                Воспитанника (далее - «Заказчик»).
+                1.1. Настоящий Договор регулирует отношения между ИП Ахтаханов А.А. (далее - «Исполнитель») и Законным
+                Представителем Воспитанника (далее - «Заказчик»).
               </p>
               <p>
-                1.2. Договор заключается на условиях публичной оферты и вступает
-                в силу с момента его акцепта Заказчиком сроком на один учебный
-                год с 1 сентября по 31 августа.
+                1.2. Договор заключается на условиях публичной оферты и вступает в силу с момента его акцепта Заказчиком
+                сроком на один учебный год с 1 сентября по 31 августа.
               </p>
               <p>
-                1.3. Акцепт Оферты осуществляется путем внесения оплаты в
-                размере и на условиях настоящего договора. Договор считается
-                заключенным в момент оплаты услуг.
+                1.3. Акцепт Оферты осуществляется путем внесения оплаты в размере и на условиях настоящего договора.
+                Договор считается заключенным в момент оплаты услуг.
               </p>
 
               <h3>2. ПРЕДМЕТ ДОГОВОРА</h3>
               <p>
-                2.1. Исполнитель обязуется оказать Воспитаннику
-                физкультурно-оздоровительные услуги в виде групповых занятий с
-                подвижными играми с элементами борьбы для детей дошкольного,
-                младшего, среднего и старшего школьного возраста.
+                2.1. Исполнитель обязуется оказать Воспитаннику физкультурно-оздоровительные услуги в виде групповых
+                занятий с подвижными играми с элементами борьбы для детей дошкольного, младшего, среднего и старшего
+                школьного возраста.
               </p>
               <p>
-                2.2. Длительность одного занятия составляет не менее 28 минут и
-                не более 90 минут в зависимости от возрастной категории. Занятия
-                проводятся в группах до 30 человек.
+                2.2. Длительность одного занятия составляет не менее 28 минут и не более 90 минут в зависимости от
+                возрастной категории. Занятия проводятся в группах до 30 человек.
               </p>
 
               <h3>3. СТОИМОСТЬ УСЛУГ И ПОРЯДОК ОПЛАТЫ</h3>
               <p>
-                3.1. Место и график проведения занятий, а также актуальная
-                стоимость указаны на официальном сайте:{" "}
-                <a
-                  href="https://sambo-borz.ru"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "#D32F2F" }}
-                >
+                3.1. Место и график проведения занятий, а также актуальная стоимость указаны на официальном сайте:{" "}
+                <a href="https://sambo-borz.ru" target="_blank" rel="noopener noreferrer" style={{ color: "#D32F2F" }}>
                   https://sambo-borz.ru
                 </a>
               </p>
@@ -223,7 +285,7 @@ const Payment: React.FC = () => {
                   <strong>Абонемент на 8 занятий:</strong> 6000 рублей
                 </li>
                 <li>
-                  <strong>Разовое занятие:</strong> 500 рублей
+                  <strong>Разовое занятие:</strong> 1000 рублей
                 </li>
                 <li>
                   <strong>Первое занятие:</strong> БЕСПЛАТНО
@@ -253,26 +315,20 @@ const Payment: React.FC = () => {
 
               <h3>5. ОТВЕТСТВЕННОСТЬ СТОРОН</h3>
               <p>
-                5.1. Заказчик подтверждает, что Воспитанник не имеет медицинских
-                противопоказаний для занятий спортом и принимает на себя
-                ответственность за состояние здоровья.
+                5.1. Заказчик подтверждает, что Воспитанник не имеет медицинских противопоказаний для занятий спортом и
+                принимает на себя ответственность за состояние здоровья.
               </p>
               <p>
-                5.2. Исполнитель не несет ответственности за травмы, полученные
-                в результате несоблюдения техники безопасности или указаний
-                тренера.
+                5.2. Исполнитель не несет ответственности за травмы, полученные в результате несоблюдения техники
+                безопасности или указаний тренера.
               </p>
 
               <h3>6. ОСОБЫЕ УСЛОВИЯ</h3>
               <p>
-                6.1. Принимая условия Договора, Заказчик дает согласие на
-                размещение фото и видеоматериалов с участием Воспитанника в
-                интернете и рекламных материалах.
+                6.1. Принимая условия Договора, Заказчик дает согласие на размещение фото и видеоматериалов с участием
+                Воспитанника в интернете и рекламных материалах.
               </p>
-              <p>
-                6.2. Исполнитель вправе изменять расписание, предупредив об этом
-                Заказчика.
-              </p>
+              <p>6.2. Исполнитель вправе изменять расписание, предупредив об этом Заказчика.</p>
 
               <h3>7. КОНТАКТНАЯ ИНФОРМАЦИЯ</h3>
               <div
@@ -303,6 +359,89 @@ const Payment: React.FC = () => {
                 </p>
               </div>
             </ContractText>
+          </ContractSection>
+
+          <PaymentSection>
+            <PaymentTitle>Оплата</PaymentTitle>
+
+            <PriceCard>
+              <div className="price">6 000 ₽</div>
+              <div className="period">абонемент на 8 занятий</div>
+            </PriceCard>
+
+            <PriceCard>
+              <div className="price">7 000 ₽</div>
+              <div className="period">абонемент на 12 занятий</div>
+              <div className="description">
+                <span style={{ color: "#D32F2F", fontWeight: "bold" }}> Выгоднее!</span>
+              </div>
+            </PriceCard>
+
+            <PaymentForm>
+              <div className="form-group">
+                <label>Email *</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="your@email.com"
+                  required
+                />
+                <small style={{ color: "#666", fontSize: "12px" }}>На этот email будет отправлен чек об оплате</small>
+              </div>
+
+              <div className="form-group">
+                <label>ФИО ребенка *</label>
+                <input
+                  type="text"
+                  name="childName"
+                  value={formData.childName}
+                  onChange={handleInputChange}
+                  placeholder="Введите ФИО ребенка"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Тип абонемента *</label>
+                <select name="paymentPeriod" value={formData.paymentPeriod} onChange={handleInputChange} required>
+                  <option value="8">8 занятий - 6 000 ₽</option>
+                  <option value="12">12 занятий - 7 000 ₽ (выгоднее!)</option>
+                  <option value="custom">Другая сумма</option>
+                </select>
+              </div>
+
+              {formData.paymentPeriod === "custom" && (
+                <div className="form-group">
+                  <label>Сумма оплаты (₽) *</label>
+                  <input
+                    type="number"
+                    name="customAmount"
+                    value={formData.customAmount}
+                    onChange={handleInputChange}
+                    placeholder="Введите сумму"
+                    min="1"
+                    step="0.01"
+                    required
+                  />
+                </div>
+              )}
+
+              <PaymentButton onClick={handleSubmit} disabled={!isFormValid() || isLoading}>
+                {isLoading
+                  ? "Создание платежа..."
+                  : `Оплатить ${
+                      formData.paymentPeriod === "12"
+                        ? "7 000"
+                        : formData.paymentPeriod === "8"
+                        ? "6 000"
+                        : formData.customAmount
+                        ? `${parseFloat(formData.customAmount).toLocaleString("ru-RU")}`
+                        : "..."
+                    } ₽`}
+              </PaymentButton>
+            </PaymentForm>
 
             <AcceptanceSection>
               <CheckboxContainer>
@@ -321,145 +460,11 @@ const Payment: React.FC = () => {
                   >
                     полным текстом договора оферты
                   </a>{" "}
-                  и принимаю его условия. Даю согласие на обработку персональных
-                  данных в соответствии с Федеральным законом №152-ФЗ "О
-                  персональных данных".
+                  и принимаю его условия. Даю согласие на обработку персональных данных в соответствии с Федеральным
+                  законом №152-ФЗ "О персональных данных".
                 </span>
               </CheckboxContainer>
             </AcceptanceSection>
-          </ContractSection>
-
-          <PaymentSection>
-            <PaymentTitle>Оплата</PaymentTitle>
-
-            <PriceCard>
-              <div className="price">6 000 ₽</div>
-              <div className="period">абонемент на 8 занятий</div>
-            </PriceCard>
-
-            <PriceCard>
-              <div className="price">7 000 ₽</div>
-              <div className="period">абонемент на 12 занятий</div>
-              <div className="description">
-                <span style={{ color: "#D32F2F", fontWeight: "bold" }}>
-                  {" "}
-                  Выгоднее!
-                </span>
-              </div>
-            </PriceCard>
-
-            <PaymentForm>
-              <div className="form-group">
-                <label>ФИО родителя/законного представителя *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Введите ваше ФИО"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Телефон *</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder="+7 (___) ___-__-__"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="your@email.com"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>ФИО ребенка *</label>
-                <input
-                  type="text"
-                  name="childName"
-                  value={formData.childName}
-                  onChange={handleInputChange}
-                  placeholder="Введите ФИО ребенка"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Возраст ребенка *</label>
-                <select
-                  name="childAge"
-                  value={formData.childAge}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Выберите возраст</option>
-                  <option value="4">4 года</option>
-                  <option value="5">5 лет</option>
-                  <option value="6">6 лет</option>
-                  <option value="7">7 лет</option>
-                  <option value="8">8 лет</option>
-                  <option value="9">9 лет</option>
-                  <option value="10+">10+ лет</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Тип абонемента *</label>
-                <select
-                  name="paymentPeriod"
-                  value={formData.paymentPeriod}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="8">8 занятий - 6 000 ₽</option>
-                  <option value="12">12 занятий - 7 000 ₽ (выгоднее!)</option>
-                </select>
-              </div>
-
-              <PaymentButton onClick={handleSubmit} disabled={!isFormValid()}>
-                Оплатить {formData.paymentPeriod === "12" ? "7 000" : "6 000"} ₽
-              </PaymentButton>
-            </PaymentForm>
-
-            <PaymentNote>
-              <p>
-                <span className="highlight">Внимание:</span> Онлайн-касса будет
-                подключена позже. Пока что для записи и оплаты свяжитесь с нами:
-              </p>
-              <p>
-                📞 <span className="highlight">+7 (920) 164-61-58</span>
-                <br />
-                ✉️{" "}
-                <a
-                  href="mailto:a.akhtakhanov@mail.ru"
-                  style={{ color: "#D32F2F" }}
-                >
-                  a.akhtakhanov@mail.ru
-                </a>
-                <br />
-                💬{" "}
-                <a
-                  href="https://taplink.cc/anzor_coach"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "#D32F2F" }}
-                >
-                  Записаться через Taplink
-                </a>
-              </p>
-            </PaymentNote>
           </PaymentSection>
         </PaymentGrid>
       </PaymentContent>

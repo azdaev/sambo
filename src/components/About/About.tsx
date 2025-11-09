@@ -52,7 +52,7 @@ const About: React.FC = () => {
 
           <AboutImage>
             <ImageSkeleton
-              src="/images/photo-5.jpg"
+              src="/images/about-team-photo.jpg"
               alt="Тренировка в зале"
               borderRadius="15px"
             />

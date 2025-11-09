@@ -30,23 +30,18 @@ const Hero: React.FC = () => {
           <h1>BORZ TEAM</h1>
           <div className="subtitle">ГОТОВИМ ЧЕМПИОНОВ ПО САМБО!</div>
           <p>
-            Приводите ребенка в секцию, где воспитывают силу, дух и дисциплину!
-            Наш тренер - Ахтаханов Анзор Алиевич, мастер спорта по самбо и
-            джиу-джитсу, трехкратный чемпион России и призер чемпионата мира!
+            Приводите ребенка в секцию, где воспитывают силу, дух и дисциплину! Наш тренер - Ахтаханов Анзор Алиевич,
+            мастер спорта по самбо и джиу-джитсу, трехкратный чемпион России и призер чемпионата мира!
           </p>
           <HeroButtons>
-            <PrimaryButton onClick={handleContactClick}>
-              Записаться на тренировку
-            </PrimaryButton>
-            <SecondaryButton onClick={() => scrollToSection("about")}>
-              Узнать больше
-            </SecondaryButton>
+            <PrimaryButton onClick={handleContactClick}>Записаться на тренировку</PrimaryButton>
+            <SecondaryButton onClick={() => scrollToSection("about")}>Узнать больше</SecondaryButton>
           </HeroButtons>
         </HeroText>
 
         <HeroImage>
           <ImageSkeleton 
-            src="/images/team-photo.JPG" 
+            src="/images/team-photo.jpg" 
             alt="Тренировка по самбо"
             height="400px"
             borderRadius="20px"
